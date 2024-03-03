@@ -1,23 +1,25 @@
 {
-  "name": "project-template",
+  "name": "battle-ship",
   "version": "1.0.0",
-  "description": "template file for setting up future projects using webpack",
+  "description": "This is my battle ship project for The Odin Project",
   "private": "true",
   "scripts": {
-    "test": "jest",
+    "test": "jest --watch",
     "build": "webpack --config webpack.prod.js",
     "start": "webpack serve --open --config webpack.dev.js",
     "push": "git subtree push --prefix dist origin gh-pages"
   },
-  "author": "",
+  "author": "Brent-the-carpenter",
   "license": "ISC",
   "devDependencies": {
     "@babel/preset-env": "^7.24.0",
+    "@types/jest": "^29.5.12",
     "css-loader": "^6.9.1",
     "eslint": "^8.56.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jest": "^27.9.0",
     "html-webpack-plugin": "^5.6.0",
     "jest": "^29.7.0",
     "style-loader": "^3.3.4",
@@ -25,5 +27,6 @@
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.1",
     "webpack-merge": "^5.10.0"
-  }
+  },
+  "main": "webpack.common.js"
 }
