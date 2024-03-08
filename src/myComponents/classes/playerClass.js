@@ -37,10 +37,12 @@ class Player {
       const attackResult = opponent.gameBoard.receiveAttack(coordinates);
 
       this.turn = false;
+
       opponent.turn = true;
 
       return attackResult;
     }
+    return undefined;
   }
 }
 export default Player;

@@ -1,4 +1,4 @@
-import Ship from "./shipClass";
+import Ship from "../classes/shipClass";
 
 const ship = new Ship(4);
 test("ship has length property", () => {

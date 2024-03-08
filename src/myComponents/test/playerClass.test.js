@@ -1,4 +1,4 @@
-import Player from "./playerClass";
+import Player from "../classes/playerClass";
 
 test(" new Player should return create new instance of player.", () => {
   const player1 = new Player();

@@ -1,4 +1,4 @@
-import GameBoard from "./gameBoardClass";
+import GameBoard from "../classes/gameBoardClass";
 
 describe("testing gameboard creation", () => {
   test("check if map has position a3 ", () => {
