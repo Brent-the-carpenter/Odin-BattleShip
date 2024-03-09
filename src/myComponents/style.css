@@ -2,10 +2,12 @@
   margin: 0;
   padding: 0;
 }
-html {
-  /* height: 100vh; */
-}
+
 body {
+  display: flex;
+
+  flex-direction: column;
+  align-items: center;
   width: 100%;
   height: 100vh;
   text-align: center;
@@ -72,7 +74,7 @@ body {
   position: relative;
   left: 45%;
   top: 20px;
-
+  border-radius: 12px;
   width: 150px;
   font-size: 30px;
   background-color: rgba(134, 133, 133, 0.4);
@@ -106,23 +108,89 @@ body {
   transform: scale(1.2);
 }
 
+#placeShipMessage {
+  display: flex;
+  flex-direction: column;
+  font-size: 40px;
+  width: 590px;
+  left: 20px;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  padding: 8px;
+  color: rgba(255, 255, 255, 1);
+  text-shadow: 2px 2px 0px rgb(0, 0, 0), 2px -2px 0px rgb(0, 0, 0),
+    -2px 2px 0px rgb(0, 0, 0), -2px -2px 0px rgb(0, 0, 0),
+    2px 0px 0px rgb(0, 0, 0), 0px 2px 0px rgb(0, 0, 0),
+    -2px 0px 0px rgb(0, 0, 0), 0px -2px 0px rgb(0, 0, 0);
+}
+
 .boardContainer {
   display: none;
-  flex-direction: row;
-  gap: 50px;
-  justify-content: center;
+  flex-direction: row-reverse;
 
-  height: 100vh;
+  justify-content: center;
+  height: auto;
 }
-#gameBoard1,
+#gameBoard,
 #gameBoard2 {
   display: grid;
-  /* grid-auto-flow: row; */
-  grid-template-columns: repeat(10, 50px);
-  grid-template-rows: repeat(10, 50px);
+  justify-self: center;
+  align-items: center;
+  grid-template-columns: repeat(10, minmax(30px, 1fr));
+  grid-template-rows: repeat(10, minmax(30px, 1fr));
   width: 540px;
   height: 540px;
-  flex-wrap: wrap;
+}
+#numberContainer {
+  display: flex;
+  /* text-align: center; */
+  flex-direction: row;
+  justify-content: center;
+  font-size: 2rem;
+  gap: 5px;
+
+  padding-top: 20px;
+  /* width: 540px; */
+  margin: 0px;
+}
+
+#letterContainer {
+  grid-column: 1/2;
+  grid-row: 1/3;
+  display: flex;
+  margin-top: 5px;
+  gap: 5px;
+  flex-direction: column;
+  font-size: 2rem;
+  color: rgba(255, 255, 255, 1);
+  text-shadow: 2px 2px 0px rgb(0, 0, 0), 2px -2px 0px rgb(0, 0, 0),
+    -2px 2px 0px rgb(0, 0, 0), -2px -2px 0px rgb(0, 0, 0),
+    2px 0px 0px rgb(0, 0, 0), 0px 2px 0px rgb(0, 0, 0),
+    -2px 0px 0px rgb(0, 0, 0), 0px -2px 0px rgb(0, 0, 0);
+}
+.number,
+.letter {
+  width: 50px;
+  height: 50px;
+}
+
+#readyButton {
+  display: flex;
+  position: relative;
+  justify-content: center;
+
+  width: 150px;
+  font-size: 30px;
+  background-color: rgba(134, 133, 133, 0.4);
+  border-radius: 12px;
+  border: none;
+  padding: 8px;
+  color: rgba(255, 255, 255, 1);
+  text-shadow: 2px 2px 0px rgb(0, 0, 0), 2px -2px 0px rgb(0, 0, 0),
+    -2px 2px 0px rgb(0, 0, 0), -2px -2px 0px rgb(0, 0, 0),
+    2px 0px 0px rgb(0, 0, 0), 0px 2px 0px rgb(0, 0, 0),
+    -2px 0px 0px rgb(0, 0, 0), 0px -2px 0px rgb(0, 0, 0);
 }
 
 .boardSquare {
