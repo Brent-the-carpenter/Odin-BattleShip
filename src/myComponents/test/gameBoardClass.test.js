@@ -58,3 +58,13 @@ describe("are all ships sunk", () => {
     expect(gameBoard.allShipsSunk()).toBeFalsy();
   });
 });
+
+describe("place ships random should place all ships", () => {
+  let gameBoard;
+  beforeEach(() => {
+    gameBoard = new GameBoard();
+  });
+  test("places 5 ships randomly", () => {
+    expect(gameBoard.placeShipsRandom()).toBe("ships placed successfully");
+  });
+});

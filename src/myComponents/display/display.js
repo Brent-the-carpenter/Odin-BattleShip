@@ -1,3 +1,5 @@
+import GameBoard from "../classes/gameBoardClass";
+
 const newGame = document.querySelector("#newGame");
 const body = document.querySelector("body");
 const gatherPlayer1Info = document.querySelector("#gatherPlayer1Info");
@@ -79,14 +81,47 @@ function placeYourShipsMessage(player) {
     number.textContent = value;
     numberContainer.appendChild(number);
   });
+
+  const buttonContainer = document.createElement("div");
+  buttonContainer.setAttribute("id", "placeShipButtons");
   const readyButton = document.createElement("button");
   readyButton.textContent = "Ready";
   readyButton.setAttribute("id", "readyButton");
+
+  const orientationButton = document.createElement("button");
+  orientationButton.setAttribute("id", "orientation");
+  orientationButton.textContent = "Horizontal";
+  orientationButton.addEventListener("click", () => {
+    orientationButton.textContent =
+      orientationButton.textContent === "Horizontal"
+        ? "Vertical"
+        : "Horizontal";
+  });
+
   body.prepend(div);
   div.append(numberContainer);
-  body.appendChild(readyButton);
+  buttonContainer.appendChild(readyButton);
+  buttonContainer.appendChild(orientationButton);
+  body.appendChild(buttonContainer);
   boardContainer.append(letterContainer);
   boardContainer.style.display = "flex";
+}
+
+function getOrientation() {
+  const orientation = document.querySelector("#orientation").textContent;
+  return orientation;
+}
+function addEventListeners(gameBoard) {
+  const boardSquare = document.querySelectorAll(".boardSquare");
+
+  boardSquare.forEach((square) => {
+    square.addEventListener("click", (event) => {
+      const location = event.target.id;
+      console.log(location);
+      const result = gameBoard.clickEventHandler(location);
+      console.log(result);
+    });
+  });
 }
 
 export {
@@ -96,4 +131,6 @@ export {
   renderVsAi,
   clearScreen,
   placeYourShipsMessage,
+  addEventListeners,
+  getOrientation,
 };

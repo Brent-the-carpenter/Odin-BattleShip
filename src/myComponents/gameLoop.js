@@ -6,6 +6,7 @@ import {
   renderVsAi,
   clearScreen,
   placeYourShipsMessage,
+  addEventListeners,
 } from "./display/display";
 
 const newGame = document.querySelector("#newGame");
@@ -14,20 +15,23 @@ const Player2Name = document.querySelector("#player2");
 const getPlayer2Name = document.querySelector("#player2Button");
 const AiButton = document.querySelector("#AI");
 const startButton = document.querySelector("#startGame");
+const square = document.querySelector(".boardSquare");
 
 function opponentCheck() {
-  if (Player2Name !== "") return Player2Name.value;
+  if (Player2Name.value !== "") return Player2Name.value;
   return "AI";
 }
 function startGame() {
   const player1 = new Player(Player1Name.value);
-  const player2 = new Player(opponentCheck);
+  const player2 = new Player(opponentCheck());
   if (player2.name === "AI") {
     player2.computer = true;
+
+    clearScreen();
+    placeYourShipsMessage(player1.name);
+    renderGameBoard(player1.gameBoard.gameBoard, "gameBoard");
+    addEventListeners(player1.gameBoard);
   }
-  clearScreen();
-  placeYourShipsMessage(player1.name);
-  renderGameBoard(player1.gameBoard.gameBoard, "gameBoard");
 }
 
 newGame.addEventListener("click", () => renderGetPlayer1());
