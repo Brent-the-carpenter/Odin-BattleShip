@@ -14,7 +14,7 @@ describe("computerAttack method", () => {
     player = new Player("Human");
     computer = new Player("Computer");
     computer.initializePossibleCoordinates();
-    player.gameBoard.placeShip(10, "a1", "horizontal");
+    player.gameBoard.placeShip(9, "a1", "Horizontial");
     computer.computer = true;
     computer.turn = true;
   });

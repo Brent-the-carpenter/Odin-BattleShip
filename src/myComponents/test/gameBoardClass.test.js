@@ -17,7 +17,7 @@ describe("testing ship placement", () => {
   test("places ship on gameboard", () => {
     const gameBoard = new GameBoard();
 
-    expect(gameBoard.placeShip(3, "a3", "horizontal")).toBe(
+    expect(gameBoard.placeShip(3, "a3", "Horizontial")).toBe(
       "ship placed successfully"
     );
   });
@@ -26,7 +26,7 @@ describe("testing ship placement", () => {
 describe("testing recieve attacks function", () => {
   test("should mark ship as hit if ship is in location", () => {
     const newgameBoard = new GameBoard();
-    newgameBoard.placeShip(5, "a1", "horizontal");
+    newgameBoard.placeShip(5, "a1", "Vertical");
     expect(newgameBoard.receiveAttack("a1")).toBe("Hit");
     expect(newgameBoard.receiveAttack("b1")).toBe("Hit");
     expect(newgameBoard.receiveAttack("c1")).toBe("Hit");

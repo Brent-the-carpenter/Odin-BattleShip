@@ -35,7 +35,7 @@ class Player {
       const coordinates = this.possibleCoordinates.splice(randomIndex, 1)[0]; // Remove and get the coordinate
 
       const attackResult = opponent.gameBoard.receiveAttack(coordinates);
-
+      console.log(attackResult);
       this.turn = false;
 
       opponent.turn = true;

@@ -1,5 +1,4 @@
 import Ship from "./shipClass";
-import { getOrientation } from "../display/display";
 
 export default class GameBoard {
   constructor() {
@@ -22,12 +21,12 @@ export default class GameBoard {
     return newgameBoard;
   }
 
-  static getcolumnLetterIndex(letter) {
+  static getColumnLetterIndex(letter) {
     const xPositions = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
     return xPositions.findIndex((element) => element === letter);
   }
 
-  static getcolumnletter(index) {
+  static getColumnLetter(index) {
     const xPositions = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"];
     return xPositions[index];
   }
@@ -43,7 +42,7 @@ export default class GameBoard {
 
     const shipsNotPlaced = ships.reduce((notPlaced, ship) => {
       const randomNumber = Math.floor(Math.random() * 10);
-      const randomLetter = GameBoard.getcolumnletter(
+      const randomLetter = GameBoard.getColumnLetter(
         Math.floor(Math.random() * 10)
       );
       const orientation = ["horizontal", "vertical"][
@@ -79,36 +78,39 @@ export default class GameBoard {
 
     let outOfBounds = false; // Flag to mark if ship extends beyond the board
     if (orientation === "Vertical") {
-      const indexOfLetter = GameBoard.getcolumnLetterIndex(column);
+      const indexOfLetter = GameBoard.getColumnLetterIndex(column);
       for (let i = 0; i < size; i += 1) {
-        const nextColumn = GameBoard.getcolumnletter(indexOfLetter + i);
+        const nextColumn = GameBoard.getColumnLetter(indexOfLetter + i);
         if (nextColumn === undefined || row > 9) {
-          // Check for horizontal bounds explicitly
-          outOfBounds = true;
-          break;
-        }
-        console.log(nextColumn + row);
-        positions.push(nextColumn + row);
-      }
-    } else {
-      // "vertical"
-      for (let i = 0; i < size; i += 1) {
-        if (row + i > 9) {
           // Check for vertical bounds explicitly
           outOfBounds = true;
           break;
         }
-        console.log(column + (row + i));
+        // console.log(nextColumn + row);
+        positions.push(nextColumn + row);
+      }
+    } else {
+      // "Horizontial"
+      for (let i = 0; i < size; i += 1) {
+        if (row + i > 9) {
+          // Check for Horizontal bounds explicitly
+          outOfBounds = true;
+          break;
+        }
+        // console.log(column + (row + i));
         positions.push(column + (row + i));
       }
     }
 
     if (outOfBounds) return "coordinates out of bounds";
     if (positions.some((pos) => this.gameBoard.get(pos) !== null)) {
+      console.log("space full");
       return "space is full";
     }
-
     positions.forEach((pos) => this.gameBoard.set(pos, newShip));
+    positions.forEach((pos) => {
+      document.querySelector(`#${pos}`).style.backgroundColor = "green";
+    });
     return "ship placed successfully";
   }
 
@@ -139,13 +141,30 @@ export default class GameBoard {
     const ships = Array.from(this.gameBoard.values()).filter(
       (value) => value !== null
     );
-    return ships.every((ship) => ship.isSunk());
+    const result = ships.every((ship) => ship.isSunk());
+
+    return result;
+  }
+
+  static getOrientation() {
+    const orientation = document.querySelector("#orientation").textContent;
+    return orientation;
+  }
+
+  alertShipsPlaced() {
+    if (this.shipsPlaced) {
+      document.querySelector("#readyButton").style.backgroundColor = "green";
+      const event = new CustomEvent("shipsPlaced", {
+        detail: { message: "All ships have been placed" },
+      });
+      document.dispatchEvent(event);
+    }
   }
 
   clickEventHandler(location) {
     if (this.shipsPlaced === false) {
-      const orientation = getOrientation();
-      console.log(orientation);
+      const orientation = GameBoard.getOrientation();
+      console.log(orientation, location);
       const result = this.placeShip(
         this.ships[this.shipIndex],
         location,
@@ -155,12 +174,13 @@ export default class GameBoard {
         this.shipIndex += 1;
         if (this.shipIndex >= this.ships.length) {
           this.shipsPlaced = true;
-          document.querySelector("#readyButton").style.backgroundColor =
-            "green";
         }
+      }
+      if (result === "space is full") {
+        return "can not put ship there";
       }
       return result;
     }
-    return null;
+    return this.alertShipsPlaced();
   }
 }

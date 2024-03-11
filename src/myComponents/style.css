@@ -108,7 +108,7 @@ body {
   transform: scale(1.2);
 }
 
-#placeShipMessage {
+#placeMessage {
   display: flex;
   flex-direction: column;
   font-size: 40px;

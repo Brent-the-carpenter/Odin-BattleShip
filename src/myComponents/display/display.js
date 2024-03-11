@@ -32,6 +32,12 @@ function renderGameBoard(playerBoardState, containerId) {
     container.appendChild(square);
   });
 }
+function clearGameBoard() {
+  const gameBoard = document.querySelector("#gameBoard");
+  while (gameBoard.firstChild) {
+    gameBoard.removeChild(gameBoard.firstChild);
+  }
+}
 
 function renderGetPlayer1() {
   newGame.style.display = "none";
@@ -60,7 +66,7 @@ function clearScreen() {
 
 function placeYourShipsMessage(player) {
   const div = document.createElement("div");
-  div.setAttribute("id", "placeShipMessage");
+  div.setAttribute("id", "placeMessage");
   const placeShipMessage = `${player} place your ships`;
   div.textContent = placeShipMessage;
   const letterContainer = document.createElement("div");
@@ -107,10 +113,58 @@ function placeYourShipsMessage(player) {
   boardContainer.style.display = "flex";
 }
 
-function getOrientation() {
-  const orientation = document.querySelector("#orientation").textContent;
-  return orientation;
+function calculateShipPositions(startColumn, startRow, orientation, size) {
+  const positions = [];
+  const indexOfLetter = GameBoard.getColumnLetterIndex(startRow); // Assuming this method exists and correctly returns an index for a column letter
+  console.log(`orientation = ${orientation}`);
+  for (let i = 0; i < size; i += 1) {
+    let nextColumn;
+    let nextRow;
+
+    if (orientation === "Horizontal") {
+      nextRow = GameBoard.getColumnLetter(indexOfLetter);
+      nextColumn = startColumn + i;
+      console.log(nextColumn);
+      // Ensure nextRow is within bounds before adding
+      if (nextColumn !== undefined && nextColumn <= 9) {
+        positions.push(nextRow + nextColumn);
+      }
+    } else {
+      // Assuming Vertical""
+      nextRow = GameBoard.getColumnLetter(indexOfLetter + i);
+      nextColumn = startColumn;
+      // Ensure nextColumn is defined before adding
+      if (nextRow !== undefined) {
+        positions.push(nextRow + nextColumn);
+      }
+    }
+  }
+
+  return positions;
 }
+
+function highlightShipPlacement(startLocation, orientation, size) {
+  const startColumn = parseInt(startLocation.slice(1), 10);
+
+  const startRow = startLocation.slice(0, 1);
+  const positions = calculateShipPositions(
+    startColumn,
+    startRow,
+    orientation,
+    size
+  );
+  console.log(positions);
+  positions.forEach((pos) => {
+    const square = document.getElementById(pos);
+    if (square) square.classList.add("highlight");
+  });
+}
+function clearHighlight() {
+  document.querySelectorAll(".highlight").forEach((square) => {
+    square.classList.remove("highlight");
+  });
+}
+
 function addEventListeners(gameBoard) {
   const boardSquare = document.querySelectorAll(".boardSquare");
 
@@ -121,7 +175,45 @@ function addEventListeners(gameBoard) {
       const result = gameBoard.clickEventHandler(location);
       console.log(result);
     });
+    square.addEventListener("mouseover", (event) => {
+      const location = event.target.id;
+
+      highlightShipPlacement(
+        location,
+        GameBoard.getOrientation(),
+        gameBoard.ships[gameBoard.shipIndex]
+      );
+    });
+
+    square.addEventListener("mouseout", (event) => {
+      clearHighlight();
+    });
   });
+}
+function addFireEventListner(opponentsBoard) {
+  const squares = document.querySelectorAll(".boardSquares");
+  squares.forEach((square) => {
+    square.addEventListener("click", (event) =>
+      opponentsBoard.receiveAttack(event.target.id)
+    );
+  });
+}
+function updateUIPlay(player1, player2) {
+  document.querySelector("#readyButton").style.display = "none";
+  document.querySelector("#orientation").style.display = "none";
+  const opponentsBoard = player1.turn ? player1 : player2;
+  clearGameBoard();
+  renderGameBoard(opponentsBoard.GameBoard.GameBoard, "gameBoard");
+
+  const placeMessage = document.querySelector("#placeMessage");
+  if (player1.win) {
+    placeMessage.textContent = `${player1} Wins!`;
+  }
+  if (player2.win) {
+    placeMessage.textContent = `${player2.name} Wins!`;
+  }
+  const currentplayerName = player1.turn ? player1.name : player2.name;
+  placeMessage.textContent = `${currentplayerName}'s turn`;
 }
 
 export {
@@ -132,5 +224,7 @@ export {
   clearScreen,
   placeYourShipsMessage,
   addEventListeners,
-  getOrientation,
+  updateUIPlay,
+  addFireEventListner,
+  clearGameBoard,
 };
