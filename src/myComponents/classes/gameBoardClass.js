@@ -6,6 +6,9 @@ export default class GameBoard {
     this.ships = [5, 4, 3, 3, 2];
     this.shipsPlaced = false;
     this.shipIndex = 0;
+    this.missCoordinates = [];
+
+    this.hitCoordinates = [];
   }
 
   static createGameBoard() {
@@ -74,6 +77,7 @@ export default class GameBoard {
     const row = parseInt(location.slice(1), 10);
     const newShip = new Ship(size);
     const positions = [];
+    console.log(size);
     if (row > 9) return "coordinates out of bounds"; // Simplified bounds check
 
     let outOfBounds = false; // Flag to mark if ship extends beyond the board
@@ -111,12 +115,9 @@ export default class GameBoard {
     positions.forEach((pos) => {
       document.querySelector(`#${pos}`).style.backgroundColor = "green";
     });
+
     return "ship placed successfully";
   }
-
-  missCoordinates = [];
-
-  hitCoordinates = [];
 
   receiveAttack(coordinates) {
     const attackLocation = this.gameBoard.get(coordinates);
@@ -130,17 +131,20 @@ export default class GameBoard {
         return "Ship sunk";
       }
       this.hitCoordinates.push(coordinates);
+
       return "Hit";
     }
-    this.gameBoard.set(coordinates, "Miss");
+
     this.missCoordinates.push(coordinates);
     return "Miss";
   }
 
   allShipsSunk() {
+    console.log();
     const ships = Array.from(this.gameBoard.values()).filter(
-      (value) => value !== null
+      (value) => value !== null && value !== "Miss"
     );
+    console.log(ships);
     const result = ships.every((ship) => ship.isSunk());
 
     return result;
@@ -172,8 +176,9 @@ export default class GameBoard {
       );
       if (result === "ship placed successfully") {
         this.shipIndex += 1;
-        if (this.shipIndex >= this.ships.length) {
+        if (this.shipIndex === this.ships.length) {
           this.shipsPlaced = true;
+          this.alertShipsPlaced();
         }
       }
       if (result === "space is full") {
@@ -181,6 +186,6 @@ export default class GameBoard {
       }
       return result;
     }
-    return this.alertShipsPlaced();
+    return null;
   }
 }

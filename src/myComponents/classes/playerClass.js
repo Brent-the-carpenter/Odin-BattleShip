@@ -12,9 +12,16 @@ class Player {
 
   attack(opponent, coordinates) {
     if (!this.turn) return false;
-    const result = opponent.gameBoard.receiveattack(coordinates);
+    const result = opponent.gameBoard.receiveAttack(coordinates);
+
+    if (opponent.gameBoard.allShipsSunk()) {
+      this.win = true;
+    }
     this.turn = false;
     opponent.turn = true;
+    console.log(
+      `${this.name} attacks ${opponent.name} on ${coordinates} the result is ${result}`
+    );
     return result;
   }
 
@@ -35,11 +42,13 @@ class Player {
       const coordinates = this.possibleCoordinates.splice(randomIndex, 1)[0]; // Remove and get the coordinate
 
       const attackResult = opponent.gameBoard.receiveAttack(coordinates);
-      console.log(attackResult);
+
       this.turn = false;
 
       opponent.turn = true;
-
+      console.log(
+        `${this.name} attacks ${opponent} on ${coordinates} the result is ${attackResult}`
+      );
       return attackResult;
     }
     return undefined;

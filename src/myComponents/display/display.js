@@ -1,4 +1,5 @@
 import GameBoard from "../classes/gameBoardClass";
+import Ship from "../classes/shipClass";
 
 const newGame = document.querySelector("#newGame");
 const body = document.querySelector("body");
@@ -10,28 +11,37 @@ const vsAi = document.querySelector("#vs");
 const greeting = document.querySelector("#greeting");
 const boardContainer = document.querySelector(".boardContainer");
 
-function renderGameBoard(playerBoardState, containerId) {
-  console.log(containerId);
+function renderGameBoard(player, containerId) {
   const container = document.getElementById(containerId);
   container.innerHTML = " ";
-
-  playerBoardState.forEach((value, key) => {
-    console.log(value);
+  const hitCoordinates = [...player.gameBoard.hitCoordinates];
+  const missCordinates = [...player.gameBoard.missCoordinates];
+  player.gameBoard.gameBoard.forEach((value, key) => {
     const square = document.createElement("div");
     square.classList.add("boardSquare");
 
-    if (value === "ship") {
-      square.classList.add("ship");
-    } else if (value === "hit") {
-      square.classList.add("hit");
-    } else if (value === "miss") {
+    if (value instanceof Ship) {
+      square.classList.add("Ship");
+
+      if (value.sunk === true) {
+        square.classList.add("sunk");
+        square.textContent = "X";
+      }
+    }
+    if (missCordinates.includes(key) === true) {
       square.classList.add("miss");
+      square.textContent = "M";
+    }
+    if (hitCoordinates.includes(key) === true) {
+      square.classList.add("hit");
+      square.textContent = "X";
     }
 
     square.id = key;
     container.appendChild(square);
   });
 }
+
 function clearGameBoard() {
   const gameBoard = document.querySelector("#gameBoard");
   while (gameBoard.firstChild) {
@@ -103,9 +113,9 @@ function placeYourShipsMessage(player) {
         ? "Vertical"
         : "Horizontal";
   });
-
+  body.prepend(numberContainer);
   body.prepend(div);
-  div.append(numberContainer);
+
   buttonContainer.appendChild(readyButton);
   buttonContainer.appendChild(orientationButton);
   body.appendChild(buttonContainer);
@@ -116,7 +126,7 @@ function placeYourShipsMessage(player) {
 function calculateShipPositions(startColumn, startRow, orientation, size) {
   const positions = [];
   const indexOfLetter = GameBoard.getColumnLetterIndex(startRow); // Assuming this method exists and correctly returns an index for a column letter
-  console.log(`orientation = ${orientation}`);
+
   for (let i = 0; i < size; i += 1) {
     let nextColumn;
     let nextRow;
@@ -124,7 +134,7 @@ function calculateShipPositions(startColumn, startRow, orientation, size) {
     if (orientation === "Horizontal") {
       nextRow = GameBoard.getColumnLetter(indexOfLetter);
       nextColumn = startColumn + i;
-      console.log(nextColumn);
+
       // Ensure nextRow is within bounds before adding
       if (nextColumn !== undefined && nextColumn <= 9) {
         positions.push(nextRow + nextColumn);
@@ -153,7 +163,7 @@ function highlightShipPlacement(startLocation, orientation, size) {
     orientation,
     size
   );
-  console.log(positions);
+
   positions.forEach((pos) => {
     const square = document.getElementById(pos);
     if (square) square.classList.add("highlight");
@@ -190,20 +200,43 @@ function addEventListeners(gameBoard) {
     });
   });
 }
-function addFireEventListner(opponentsBoard) {
-  const squares = document.querySelectorAll(".boardSquares");
+function addFireEventListener(player1, player2) {
+  console.log("add fire event running");
+  const squares = document.querySelectorAll(".boardSquare");
   squares.forEach((square) => {
-    square.addEventListener("click", (event) =>
-      opponentsBoard.receiveAttack(event.target.id)
-    );
+    square.addEventListener("click", (event) => {
+      // Execute the attack and capture the result
+      const attackResult = player1.attack(player2, event.target.id);
+      console.log(`Fire ${attackResult} on square ${event.target.id}`);
+      // Update the game board based on the attack's outcome
+      renderGameBoard(player2, "gameBoard");
+
+      // Dispatch a custom "fired" event with details of the attack
+      document.dispatchEvent(
+        new CustomEvent("fired", {
+          detail: {
+            attacker: player1,
+            opponent: player2,
+            target: event.target.id,
+            result: attackResult,
+          },
+        })
+      );
+    });
   });
 }
+
 function updateUIPlay(player1, player2) {
   document.querySelector("#readyButton").style.display = "none";
   document.querySelector("#orientation").style.display = "none";
-  const opponentsBoard = player1.turn ? player1 : player2;
+  const opponentsBoard = player1.turn ? player2 : player1;
+  console.log(` update ui running${opponentsBoard.name}`);
   clearGameBoard();
-  renderGameBoard(opponentsBoard.GameBoard.GameBoard, "gameBoard");
+  renderGameBoard(
+    opponentsBoard,
+
+    "gameBoard"
+  );
 
   const placeMessage = document.querySelector("#placeMessage");
   if (player1.win) {
@@ -225,6 +258,6 @@ export {
   placeYourShipsMessage,
   addEventListeners,
   updateUIPlay,
-  addFireEventListner,
+  addFireEventListener,
   clearGameBoard,
 };
