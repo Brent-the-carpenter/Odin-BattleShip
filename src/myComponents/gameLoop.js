@@ -10,8 +10,13 @@ import {
   updateUIPlay,
   addFireEventListener,
   clearGameBoard,
+  addBoardNumbersAndLetters,
+  addPlacementButtons,
+  hitAnimation,
+  missAnimation,
+  removeGameBoardAnimation,
 } from "./display/display";
-
+const gameBoard = "gameBoard";
 const newGame = document.querySelector("#newGame");
 const Player1Name = document.querySelector("#player1");
 const Player2Name = document.querySelector("#player2");
@@ -32,6 +37,40 @@ function createAiTurnListener(player1, player2) {
   };
   return listener;
 }
+
+function opponentsTurn(player1, player2) {
+  // setTimeout(() => {
+  //  renderGameBoard()
+  // }, 2000);
+
+  playAgainstPlayer(player1, player2);
+}
+function createPlayerTurnListner(player1, player2) {
+  const listener = function playerTurnListner(event) {
+    if (player1.win === true || player2.win === true) {
+      document.removeEventListener("fired", listener);
+      const winningPlayer = player1.win ? player1.name : player2.name;
+      const message = document.querySelector("#placeMessage");
+      message.textContent = `${winningPlayer} Wins!`;
+      return;
+    }
+    const currentPlayer = player1.turn ? player1 : player2;
+    const nextPlayersTurn = player1.turn ? player2 : player1;
+
+    renderGameBoard(currentPlayer, gameBoard);
+
+    setTimeout(() => {
+      opponentsTurn(currentPlayer, nextPlayersTurn);
+    }, 2000);
+  };
+  return listener;
+}
+function playAgainstPlayer(player1, player2) {
+  updateUIPlay(player1, player2);
+  addFireEventListener(player1, player2);
+  const playerTurnListner = createPlayerTurnListner(player1, player2);
+  document.addEventListener("fired", playerTurnListner);
+}
 function playAgainstAi(player1, player2) {
   player1.turn = true;
   updateUIPlay(player1, player2);
@@ -41,25 +80,39 @@ function playAgainstAi(player1, player2) {
 }
 
 function aiTurn(player, computer) {
-  setTimeout(() => {
-    updateUIPlay(player, computer);
-  }, 2000);
-  setTimeout(() => {
-    computer.computerAttack(player);
-    renderGameBoard(player, "gameBoard");
-    console.log(player.turn);
-  }, 3000);
+  updateUIPlay(player, computer);
 
   setTimeout(() => {
+    const result = computer.computerAttack(player);
+    if (result.attackResult === "Hit") {
+      hitAnimation(result.coordinates);
+    }
+    if (result.attackResult === "Miss") {
+      missAnimation(result.coordinates);
+    }
+  }, 1000);
+  setTimeout(() => {
+    removeGameBoardAnimation(gameBoard);
+    document.getElementById(gameBoard).classList.add("zoom-out");
+  }, 3000);
+  setTimeout(() => {
+    renderGameBoard(player, gameBoard);
+    console.log(player.turn);
     playAgainstAi(player, computer);
-  }, 5000);
+  }, 4000);
+  // setTimeout(() => {
+
+  // }, 4000);
 }
 
 function setupPlayerGameBoard(player) {
   clearGameBoard();
+  addBoardNumbersAndLetters();
   placeYourShipsMessage(player.name);
 
-  renderGameBoard(player, "gameBoard");
+  addPlacementButtons();
+
+  renderGameBoard(player, gameBoard);
 
   addEventListeners(player.gameBoard);
 }
@@ -94,10 +147,12 @@ function setupGame() {
         setupPlayerGameBoard(player2);
 
         readyButton.removeEventListener("click", onReadyButtonClick);
-
-        readyButton.addEventListener("click", () => {
-          // Code to start the game or finalize player2's setup
-          // This might involve checking shipsPlaced for player2 and then starting the game
+        console.log(readyButton);
+        const player2readyButton = document.querySelector("#readyButton");
+        player2readyButton.addEventListener("click", () => {
+          console.log("ready clicked");
+          player1.turn = true;
+          playAgainstPlayer(player1, player2);
         });
       }
       return null;

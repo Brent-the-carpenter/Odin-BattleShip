@@ -49,7 +49,7 @@ class Player {
       console.log(
         `${this.name} attacks ${opponent} on ${coordinates} the result is ${attackResult}`
       );
-      return attackResult;
+      return { attackResult, coordinates };
     }
     return undefined;
   }

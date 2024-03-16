@@ -10,10 +10,21 @@ const gatherPlayer2Info = document.querySelector("#gatherPlayer2Info");
 const vsAi = document.querySelector("#vs");
 const greeting = document.querySelector("#greeting");
 const boardContainer = document.querySelector(".boardContainer");
-
+function removeGameBoardAnimation(containerId) {
+  const container = document.getElementById(containerId);
+  if (container.classList.contains("zoom-in")) {
+    container.classList.remove("zoom-in");
+  }
+  if (container.classList.contains("zoom-out")) {
+    container.classList.remove("zoom-out");
+  }
+}
 function renderGameBoard(player, containerId) {
   const container = document.getElementById(containerId);
   container.innerHTML = " ";
+  if (container) {
+    container.classList.add("zoom-in");
+  }
   const hitCoordinates = [...player.gameBoard.hitCoordinates];
   const missCordinates = [...player.gameBoard.missCoordinates];
   player.gameBoard.gameBoard.forEach((value, key) => {
@@ -29,11 +40,13 @@ function renderGameBoard(player, containerId) {
       }
     }
     if (missCordinates.includes(key) === true) {
-      square.classList.add("miss");
+      square.classList.add("hasBeenMissed");
+
       square.textContent = "M";
     }
     if (hitCoordinates.includes(key) === true) {
-      square.classList.add("hit");
+      square.classList.add("hasBeenHit");
+
       square.textContent = "X";
     }
 
@@ -72,6 +85,22 @@ function clearScreen() {
   vsAi.style.display = "none";
   gatherPlayer1Info.style.display = "none";
   greeting.style.display = "none";
+  if (document.querySelector("#placeMessage")) {
+    const message = document.getElementById("placeMessage");
+    body.removeChild(message);
+  }
+  if (document.querySelector("#letterContainer")) {
+    const letterContainer = document.getElementById("letterContainer");
+    boardContainer.removeChild(letterContainer);
+  }
+  if (document.querySelector("#numberContainer")) {
+    const numberContainer = document.getElementById("numberContainer");
+    body.removeChild(numberContainer);
+  }
+  if (document.querySelector("#placeShipButtons")) {
+    const placeShipButtons = document.getElementById("placeShipButtons");
+    body.removeChild(placeShipButtons);
+  }
 }
 
 function placeYourShipsMessage(player) {
@@ -79,15 +108,12 @@ function placeYourShipsMessage(player) {
   div.setAttribute("id", "placeMessage");
   const placeShipMessage = `${player} place your ships`;
   div.textContent = placeShipMessage;
-  const letterContainer = document.createElement("div");
-  letterContainer.setAttribute("id", "letterContainer");
-  const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
-  letters.forEach((value) => {
-    const letter = document.createElement("div");
-    letter.classList.add("letter");
-    letter.textContent = value;
-    letterContainer.appendChild(letter);
-  });
+
+  body.prepend(div);
+
+  boardContainer.style.display = "flex";
+}
+function addBoardNumbersAndLetters() {
   const numberContainer = document.createElement("div");
   numberContainer.setAttribute("id", "numberContainer");
   const numbers = ["", 0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -97,32 +123,37 @@ function placeYourShipsMessage(player) {
     number.textContent = value;
     numberContainer.appendChild(number);
   });
-
+  const letterContainer = document.createElement("div");
+  letterContainer.setAttribute("id", "letterContainer");
+  const letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+  letters.forEach((value) => {
+    const letter = document.createElement("div");
+    letter.classList.add("letter");
+    letter.textContent = value;
+    letterContainer.appendChild(letter);
+  });
+  body.prepend(numberContainer);
+  boardContainer.append(letterContainer);
+}
+function addPlacementButtons() {
+  const orientationButton = document.createElement("button");
+  orientationButton.setAttribute("id", "orientation");
+  orientationButton.textContent = "Horizontal";
   const buttonContainer = document.createElement("div");
   buttonContainer.setAttribute("id", "placeShipButtons");
   const readyButton = document.createElement("button");
   readyButton.textContent = "Ready";
   readyButton.setAttribute("id", "readyButton");
-
-  const orientationButton = document.createElement("button");
-  orientationButton.setAttribute("id", "orientation");
-  orientationButton.textContent = "Horizontal";
   orientationButton.addEventListener("click", () => {
     orientationButton.textContent =
       orientationButton.textContent === "Horizontal"
         ? "Vertical"
         : "Horizontal";
   });
-  body.prepend(numberContainer);
-  body.prepend(div);
-
+  body.appendChild(buttonContainer);
   buttonContainer.appendChild(readyButton);
   buttonContainer.appendChild(orientationButton);
-  body.appendChild(buttonContainer);
-  boardContainer.append(letterContainer);
-  boardContainer.style.display = "flex";
 }
-
 function calculateShipPositions(startColumn, startRow, orientation, size) {
   const positions = [];
   const indexOfLetter = GameBoard.getColumnLetterIndex(startRow); // Assuming this method exists and correctly returns an index for a column letter
@@ -174,6 +205,27 @@ function clearHighlight() {
     square.classList.remove("highlight");
   });
 }
+function checkIfEventOrCoordinates(event) {
+  let id;
+  if (event && event.target && event.target.id) {
+    id = event.target.id;
+  } else {
+    id = event;
+  }
+  return id;
+}
+function hitAnimation(event) {
+  const id = checkIfEventOrCoordinates(event);
+  const square = document.getElementById(id);
+  square.classList.add("hit");
+  square.textContent = "X";
+}
+function missAnimation(event) {
+  const id = checkIfEventOrCoordinates(event);
+  const square = document.getElementById(id);
+  square.classList.add("miss");
+  square.textContent = "M";
+}
 
 function addEventListeners(gameBoard) {
   const boardSquare = document.querySelectorAll(".boardSquare");
@@ -208,36 +260,43 @@ function addFireEventListener(player1, player2) {
       // Execute the attack and capture the result
       const attackResult = player1.attack(player2, event.target.id);
       console.log(`Fire ${attackResult} on square ${event.target.id}`);
-      // Update the game board based on the attack's outcome
-      renderGameBoard(player2, "gameBoard");
+      if (attackResult === "Hit") {
+        hitAnimation(event);
+      }
+      if (attackResult === "Miss") {
+        missAnimation(event);
+      }
+      setTimeout(() => {
+        removeGameBoardAnimation("gameBoard");
+        document.getElementById("gameBoard").classList.add("zoom-out");
+      }, 1500);
+      setTimeout(() => {
+        // Update the game board based on the attack's outcome
+        removeGameBoardAnimation("gameBoard");
+        renderGameBoard(player2, "gameBoard");
 
-      // Dispatch a custom "fired" event with details of the attack
-      document.dispatchEvent(
-        new CustomEvent("fired", {
-          detail: {
-            attacker: player1,
-            opponent: player2,
-            target: event.target.id,
-            result: attackResult,
-          },
-        })
-      );
+        // Dispatch a custom "fired" event with details of the attack
+        document.dispatchEvent(
+          new CustomEvent("fired", {
+            detail: {
+              attacker: player1,
+              opponent: player2,
+              target: event.target.id,
+              result: attackResult,
+            },
+          })
+        );
+      }, 2000);
     });
   });
 }
 
 function updateUIPlay(player1, player2) {
+  console.log(`${player1.turn} ${player2.turn}`);
   document.querySelector("#readyButton").style.display = "none";
   document.querySelector("#orientation").style.display = "none";
   const opponentsBoard = player1.turn ? player2 : player1;
   console.log(` update ui running${opponentsBoard.name}`);
-  clearGameBoard();
-  renderGameBoard(
-    opponentsBoard,
-
-    "gameBoard"
-  );
-
   const placeMessage = document.querySelector("#placeMessage");
   if (player1.win) {
     placeMessage.textContent = `${player1} Wins!`;
@@ -247,6 +306,12 @@ function updateUIPlay(player1, player2) {
   }
   const currentplayerName = player1.turn ? player1.name : player2.name;
   placeMessage.textContent = `${currentplayerName}'s turn`;
+  clearGameBoard();
+  renderGameBoard(
+    opponentsBoard,
+
+    "gameBoard"
+  );
 }
 
 export {
@@ -260,4 +325,9 @@ export {
   updateUIPlay,
   addFireEventListener,
   clearGameBoard,
+  addBoardNumbersAndLetters,
+  addPlacementButtons,
+  hitAnimation,
+  missAnimation,
+  removeGameBoardAnimation,
 };

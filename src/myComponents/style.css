@@ -132,6 +132,32 @@ body {
   justify-content: center;
   height: auto;
 }
+.zoom-out {
+  animation: zoomOut 0.5s forwards;
+}
+
+.zoom-in {
+  animation: zoomIn 0.5s forwards;
+}
+
+@keyframes zoomOut {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(0);
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
 #gameBoard,
 #gameBoard2 {
   display: grid;
@@ -216,13 +242,54 @@ body {
 .highlight {
   background-color: #ffff99; /* Light yellow */
 }
+@keyframes hitAnimation {
+  0% {
+    background-color: red;
+    transform: scale(1);
+  }
+  50% {
+    background-color: orange;
+    transform: scale(1.1);
+  }
+  100% {
+    background-color: red;
+    transform: scale(1);
+  }
+}
+
 .hit {
-  color: rgb(7, 7, 7);
+  color: black;
+  animation: hitAnimation 1s ease-in-out;
+
   background-color: red;
 }
+.hasBeenHit {
+  color: black;
+  background-color: red;
+}
+@keyframes missAnimation {
+  0%,
+  100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: cadetblue; /* Or any color you prefer */
+  }
+}
+
+/* Apply the animation to the miss class */
 .miss {
-  color: rgba(255, 255, 255, 1);
+  animation: missAnimation 2s ease-in-out;
+  /* Optional: Customize the appearance of the miss square */
+  color: #fffefe; /* Text color */
+  text-align: center;
+  line-height: 2; /* Adjust based on your square size to vertically center the text */
+}
+.hasBeenMissed {
+  color: white;
+  background-color: cadetblue;
 }
 .sunk {
   background-color: darkred;
+  font-size: 30px;
 }
