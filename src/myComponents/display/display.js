@@ -10,6 +10,7 @@ const gatherPlayer2Info = document.querySelector("#gatherPlayer2Info");
 const vsAi = document.querySelector("#vs");
 const greeting = document.querySelector("#greeting");
 const boardContainer = document.querySelector(".boardContainer");
+
 function removeGameBoardAnimation(containerId) {
   const container = document.getElementById(containerId);
   if (container.classList.contains("zoom-in")) {
@@ -30,12 +31,12 @@ function renderGameBoard(player, containerId) {
   player.gameBoard.gameBoard.forEach((value, key) => {
     const square = document.createElement("div");
     square.classList.add("boardSquare");
-
+    square.id = key;
     if (value instanceof Ship) {
       square.classList.add("Ship");
 
       if (value.sunk === true) {
-        square.classList.add("sunk");
+        square.classList.add("shipHasBeenSunk");
         square.textContent = "X";
       }
     }
@@ -50,13 +51,13 @@ function renderGameBoard(player, containerId) {
       square.textContent = "X";
     }
 
-    square.id = key;
     container.appendChild(square);
   });
 }
 
 function clearGameBoard() {
   const gameBoard = document.querySelector("#gameBoard");
+  if (gameBoard === null) return;
   while (gameBoard.firstChild) {
     gameBoard.removeChild(gameBoard.firstChild);
   }
@@ -113,6 +114,7 @@ function placeYourShipsMessage(player) {
 
   boardContainer.style.display = "flex";
 }
+
 function addBoardNumbersAndLetters() {
   const numberContainer = document.createElement("div");
   numberContainer.setAttribute("id", "numberContainer");
@@ -135,15 +137,22 @@ function addBoardNumbersAndLetters() {
   body.prepend(numberContainer);
   boardContainer.append(letterContainer);
 }
+
 function addPlacementButtons() {
-  const orientationButton = document.createElement("button");
-  orientationButton.setAttribute("id", "orientation");
-  orientationButton.textContent = "Horizontal";
   const buttonContainer = document.createElement("div");
   buttonContainer.setAttribute("id", "placeShipButtons");
+
   const readyButton = document.createElement("button");
   readyButton.textContent = "Ready";
   readyButton.setAttribute("id", "readyButton");
+
+  const placeShipsRandomButton = document.createElement("button");
+  placeShipsRandomButton.setAttribute("id", "randomButton");
+  placeShipsRandomButton.textContent = "Random";
+
+  const orientationButton = document.createElement("button");
+  orientationButton.setAttribute("id", "orientation");
+  orientationButton.textContent = "Horizontal";
   orientationButton.addEventListener("click", () => {
     orientationButton.textContent =
       orientationButton.textContent === "Horizontal"
@@ -153,10 +162,11 @@ function addPlacementButtons() {
   body.appendChild(buttonContainer);
   buttonContainer.appendChild(readyButton);
   buttonContainer.appendChild(orientationButton);
+  buttonContainer.appendChild(placeShipsRandomButton);
 }
 function calculateShipPositions(startColumn, startRow, orientation, size) {
   const positions = [];
-  const indexOfLetter = GameBoard.getColumnLetterIndex(startRow); // Assuming this method exists and correctly returns an index for a column letter
+  const indexOfLetter = GameBoard.getColumnLetterIndex(startRow);
 
   for (let i = 0; i < size; i += 1) {
     let nextColumn;
@@ -166,7 +176,6 @@ function calculateShipPositions(startColumn, startRow, orientation, size) {
       nextRow = GameBoard.getColumnLetter(indexOfLetter);
       nextColumn = startColumn + i;
 
-      // Ensure nextRow is within bounds before adding
       if (nextColumn !== undefined && nextColumn <= 9) {
         positions.push(nextRow + nextColumn);
       }
@@ -174,7 +183,7 @@ function calculateShipPositions(startColumn, startRow, orientation, size) {
       // Assuming Vertical""
       nextRow = GameBoard.getColumnLetter(indexOfLetter + i);
       nextColumn = startColumn;
-      // Ensure nextColumn is defined before adding
+
       if (nextRow !== undefined) {
         positions.push(nextRow + nextColumn);
       }
@@ -247,6 +256,7 @@ function addEventListeners(gameBoard) {
       );
     });
 
+    // eslint-disable-next-line no-unused-vars
     square.addEventListener("mouseout", (event) => {
       clearHighlight();
     });
@@ -256,8 +266,14 @@ function addFireEventListener(player1, player2) {
   console.log("add fire event running");
   const squares = document.querySelectorAll(".boardSquare");
   squares.forEach((square) => {
+    if (
+      square.classList.contains("hasBeenHit") ||
+      square.classList.contains("hasBeenMissed") ||
+      square.classList.contains("shipHasBeenSunk")
+    ) {
+      return;
+    }
     square.addEventListener("click", (event) => {
-      // Execute the attack and capture the result
       const attackResult = player1.attack(player2, event.target.id);
       console.log(`Fire ${attackResult} on square ${event.target.id}`);
       if (attackResult === "Hit") {
@@ -266,16 +282,18 @@ function addFireEventListener(player1, player2) {
       if (attackResult === "Miss") {
         missAnimation(event);
       }
+      if (attackResult === "Ship sunk") {
+        renderGameBoard(player2, "gameBoard");
+        hitAnimation(event);
+      }
       setTimeout(() => {
         removeGameBoardAnimation("gameBoard");
         document.getElementById("gameBoard").classList.add("zoom-out");
       }, 1500);
       setTimeout(() => {
-        // Update the game board based on the attack's outcome
         removeGameBoardAnimation("gameBoard");
         renderGameBoard(player2, "gameBoard");
 
-        // Dispatch a custom "fired" event with details of the attack
         document.dispatchEvent(
           new CustomEvent("fired", {
             detail: {
@@ -295,6 +313,7 @@ function updateUIPlay(player1, player2) {
   console.log(`${player1.turn} ${player2.turn}`);
   document.querySelector("#readyButton").style.display = "none";
   document.querySelector("#orientation").style.display = "none";
+  document.querySelector("#randomButton").style.display = "none";
   const opponentsBoard = player1.turn ? player2 : player1;
   console.log(` update ui running${opponentsBoard.name}`);
   const placeMessage = document.querySelector("#placeMessage");
@@ -313,6 +332,32 @@ function updateUIPlay(player1, player2) {
     "gameBoard"
   );
 }
+function addPlayAgainButton() {
+  const playAgainButton = document.createElement("button");
+  playAgainButton.setAttribute("id", "playAgain");
+  playAgainButton.textContent = "Play Again";
+  return playAgainButton;
+}
+function addRestartButton() {
+  const restartButton = document.createElement("button");
+  restartButton.setAttribute("id", "restartButton");
+  restartButton.textContent = "Go to setup";
+  return restartButton;
+}
+
+function resetScreen() {
+  window.location.reload();
+}
+
+function addGameOverButtons() {
+  const restartButton = addRestartButton();
+  const playAgainButton = addPlayAgainButton();
+  const gameOverButtonsContainer = document.createElement("div");
+  gameOverButtonsContainer.setAttribute("id", "gameOverButtons");
+  gameOverButtonsContainer.appendChild(restartButton);
+  gameOverButtonsContainer.appendChild(playAgainButton);
+  body.appendChild(gameOverButtonsContainer);
+}
 
 export {
   renderGameBoard,
@@ -330,4 +375,8 @@ export {
   hitAnimation,
   missAnimation,
   removeGameBoardAnimation,
+  addPlayAgainButton,
+  addRestartButton,
+  addGameOverButtons,
+  resetScreen,
 };

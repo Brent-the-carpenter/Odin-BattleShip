@@ -211,8 +211,16 @@ body {
   display: flex;
   gap: 20px;
 }
+#gameOverButtons {
+  display: flex;
+  flex-direction: row;
+  gap: 50px;
+}
 #readyButton,
-#orientation {
+#orientation,
+#playAgain,
+#restartButton,
+#randomButton {
   display: flex;
   position: relative;
   justify-content: center;
@@ -289,7 +297,8 @@ body {
   color: white;
   background-color: cadetblue;
 }
-.sunk {
+
+.shipHasBeenSunk {
   background-color: darkred;
   font-size: 30px;
 }

@@ -35,6 +35,7 @@ export default class GameBoard {
   }
 
   placeShipsRandom(ships = this.ships, recursionCount = 0) {
+    console.log(Array.isArray(ships), ships);
     if (ships.length === 0) {
       return "ships placed successfully";
     }
@@ -48,7 +49,7 @@ export default class GameBoard {
       const randomLetter = GameBoard.getColumnLetter(
         Math.floor(Math.random() * 10)
       );
-      const orientation = ["horizontal", "vertical"][
+      const orientation = ["Horizontal", "Vertical"][
         Math.floor(Math.random() * 2)
       ];
 
@@ -78,30 +79,27 @@ export default class GameBoard {
     const newShip = new Ship(size);
     const positions = [];
     console.log(size);
-    if (row > 9) return "coordinates out of bounds"; // Simplified bounds check
+    if (row > 9) return "coordinates out of bounds";
 
-    let outOfBounds = false; // Flag to mark if ship extends beyond the board
+    let outOfBounds = false;
     if (orientation === "Vertical") {
       const indexOfLetter = GameBoard.getColumnLetterIndex(column);
       for (let i = 0; i < size; i += 1) {
         const nextColumn = GameBoard.getColumnLetter(indexOfLetter + i);
         if (nextColumn === undefined || row > 9) {
-          // Check for vertical bounds explicitly
           outOfBounds = true;
           break;
         }
-        // console.log(nextColumn + row);
+
         positions.push(nextColumn + row);
       }
     } else {
-      // "Horizontial"
       for (let i = 0; i < size; i += 1) {
         if (row + i > 9) {
-          // Check for Horizontal bounds explicitly
           outOfBounds = true;
           break;
         }
-        // console.log(column + (row + i));
+
         positions.push(column + (row + i));
       }
     }
