@@ -104,6 +104,17 @@ newGame.addEventListener("click", () => renderGetPlayer1());
 getPlayer2Name.addEventListener("click", () => renderGetPlayer2());
 AiButton.addEventListener("click", () => renderVsAi());
 
+function checkIfGameOver(player1, player2) {
+  if (player1.gameBoard.allShipsSunk() || player2.gameBoard.allShipsSunk()) {
+    addGameOverButtons();
+    const restartButton = document.getElementById("restartButton");
+    const playAgainButton = document.getElementById("playAgain");
+    restartButton.addEventListener("click", goToSetUp);
+    playAgainButton.addEventListener("click", playAgain);
+    return true;
+  }
+  return null;
+}
 function playAgain() {
   setupGame();
 }
@@ -122,12 +133,8 @@ function createAiTurnListener(player1, player2) {
       const winningPlayer = player1.win ? player1.name : player2.name;
       const message = document.querySelector("#placeMessage");
       message.textContent = `${winningPlayer} Wins!`;
-      addGameOverButtons();
-      const restartButton = document.getElementById("restartButton");
-      const playAgainButton = document.getElementById("playAgain");
-      restartButton.addEventListener("click", goToSetUp);
-      playAgainButton.addEventListener("click", playAgain);
-      return;
+
+      checkIfGameOver();
     }
     aiTurn(player1, player2);
     document.removeEventListener("fired", listener);
@@ -154,6 +161,7 @@ function aiTurn(player, computer) {
       missAnimation(result.coordinates);
     }
   }, 1000);
+  if (checkIfGameOver()) return;
   setTimeout(() => {
     removeGameBoardAnimation(gameBoard);
     document.getElementById(gameBoard).classList.add("zoom-out");
@@ -168,10 +176,6 @@ function aiTurn(player, computer) {
 // play against player section
 
 function opponentsTurn(player1, player2) {
-  // setTimeout(() => {
-  //  renderGameBoard()
-  // }, 2000);
-
   playAgainstPlayer(player1, player2);
 }
 function createPlayerTurnListner(player1, player2) {
@@ -181,11 +185,7 @@ function createPlayerTurnListner(player1, player2) {
       const winningPlayer = player1.win ? player1.name : player2.name;
       const message = document.querySelector("#placeMessage");
       message.textContent = `${winningPlayer} Wins!`;
-      addGameOverButtons();
-      const restartButton = document.getElementById("restartButton");
-      const playAgainButton = document.getElementById("playAgain");
-      restartButton.addEventListener("click", goToSetUp);
-      playAgainButton.addEventListener("click", playAgain);
+      checkIfGameOver();
       return;
     }
     const currentPlayer = player1.turn ? player1 : player2;
@@ -193,9 +193,7 @@ function createPlayerTurnListner(player1, player2) {
 
     renderGameBoard(currentPlayer, gameBoard);
 
-    // setTimeout(() => {
     opponentsTurn(currentPlayer, nextPlayersTurn);
-    // }, 1000);
   };
   return listener;
 }
